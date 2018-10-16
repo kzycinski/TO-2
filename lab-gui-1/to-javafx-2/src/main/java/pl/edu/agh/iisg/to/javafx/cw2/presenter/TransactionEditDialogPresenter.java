@@ -2,10 +2,18 @@ package pl.edu.agh.iisg.to.javafx.cw2.presenter;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import javafx.util.converter.LocalDateStringConverter;
+import pl.edu.agh.iisg.to.javafx.cw2.model.Category;
 import pl.edu.agh.iisg.to.javafx.cw2.model.Transaction;
+
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.time.format.DateTimeFormatter;
 
 public class TransactionEditDialogPresenter {
 
@@ -42,13 +50,18 @@ public class TransactionEditDialogPresenter {
 	
 	@FXML
 	private void handleOkAction(ActionEvent event) {
-		// TODO: implement
-	}
+        if(isInputValid()){
+            updateModel();
+            approved = true;
+        } else {
+            //TODO
+        }
+    }
 	
 	@FXML
 	private void handleCancelAction(ActionEvent event) {
-		// TODO: implement
-	}
+        dialogStage.close();
+    }
 	
 	private boolean isInputValid() {
 		// TODO: implement
@@ -56,10 +69,33 @@ public class TransactionEditDialogPresenter {
 	}
 	
 	private void updateModel() {
-		// TODO: implement
-	}
+        String pattern = "yyyy-MM-dd";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+        LocalDateStringConverter converter = new LocalDateStringConverter(formatter, formatter);
+
+        DecimalFormat decimalFormatter = new DecimalFormat();
+        decimalFormatter.setParseBigDecimal(true);
+
+
+
+        transaction.setDate(converter.fromString(dateTextField.getText()));
+        try {
+            transaction.setInflow((BigDecimal)decimalFormatter.parse(inflowTextField.getText()));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        transaction.setCategory(new Category(categoryTextField.getText()));
+        transaction.setPayee(payeeTextField.getText());
+
+    }
 	
 	private void updateControls() {
-		// TODO: implement
-	}
+        String pattern = "yyyy-MM-dd";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+        LocalDateStringConverter converter = new LocalDateStringConverter(formatter, formatter);
+        dateTextField.setText(converter.toString(transaction.getDate()));
+        payeeTextField.setText(transaction.getPayee());
+        categoryTextField.setText(transaction.getCategory().toString());
+        inflowTextField.setText(transaction.getInflow().toString());
+    }
 }

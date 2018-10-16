@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.value.ObservableBooleanValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -37,7 +38,13 @@ public class AccountOverviewController {
 
 	@FXML
 	private Button deleteButton;
-	
+
+    @FXML
+    private Button editButton;
+
+    @FXML
+    private Button addButton;
+
 	@FXML
 	private void initialize() {
 		transactionsTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -48,12 +55,35 @@ public class AccountOverviewController {
 		inflowColumn.setCellValueFactory(dataValue -> dataValue.getValue().getInflowProperty());
 		
 		deleteButton.disableProperty().bind(Bindings.isEmpty(transactionsTable.getSelectionModel().getSelectedItems()));
+        editButton.disableProperty().bind(Bindings.isEmpty(transactionsTable.getSelectionModel().getSelectedItems())
+                                                .or(Bindings.size(transactionsTable.getSelectionModel().getSelectedItems()).greaterThan(1)));
+
 	}	
 
 	@FXML
 	private void handleDeleteAction(ActionEvent event) {
 		data.getTransactions().removeAll(transactionsTable.getSelectionModel().getSelectedItems());
 	}
+
+    @FXML
+    private void handleEditAction(ActionEvent event) {
+        Transaction transaction = transactionsTable.getSelectionModel().getSelectedItem();
+        if (transaction != null) {
+            appController.showTransactionEditDialog(transaction);
+        }
+    }
+
+    @FXML
+    private void handleAddAction(ActionEvent event) {
+        Transaction transaction = Transaction.newTransaction();
+        if (transaction != null) {
+            if(appController.showTransactionEditDialog(transaction)){
+                data.addTransaction(transaction);
+            }
+        }
+
+
+    }
 
 	public void setData(Account acccount) {
 		this.data = acccount;
